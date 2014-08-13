@@ -10,7 +10,9 @@ import sys
 #import readline
 
 
-dictCounter=0
+global dictCounter
+dictCounter=1
+dict={}
 
 def word_list(line):
     """Break the line into shell words.
@@ -23,18 +25,7 @@ def word_list(line):
     return args
 
 
-# history command
-#def hist(command):
-    
-    
 
-
-def history(command):
-    if(len(command)>1):
-        print ("1")
-    else:     
-        print ("2")
-        
 
 #print current path
 def pwd():
@@ -52,23 +43,25 @@ def cd(command):
     except OSError:
         print("cd: "+command[1]+": No such file or directory")
 
-#srest_command
+#rest_command
 def rest_command(command):
-    child = os.fork()#make a child process
-    if child==0:#if it is a child
-        os.execvp(command[0], command)#execute command
-    else:    
-        os.waitpid(child,0)#wait util finished
+    try:
+        child = os.fork()#make a child process
+        if child==0:#if it is a child
+            os.execvp(command[0], command)#execute command
+        else:    
+            os.waitpid(child,0)#wait util finished
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
 
 
 
 #execute commands
-def exec_command(command):
+def exec_command(command,dict):
     try:
-        dict={dictCounter : " ".join(command)}
-
         if command[0] == 'history' or command[0] == 'h':
-            history(command)
+            history(command,dict)
         elif command[0] == 'pwd':
             pwd()
         elif command[0] == 'quit' or command[0] == 'q':
@@ -78,18 +71,36 @@ def exec_command(command):
         else:
             rest_command(command)
     except:
-        e = sys.exc_info()[0]
-        write_to_page( "<p>Error: %s</p>" % e )
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
 
 
-
+# history command
+#def hist(command):
+def history(command,dict):
+    new_command=[]
+    if(len(command)>1):
+        #print(dict)
+        print(dict.get(int(command[1])))
+        new_command.append(str(dict.get(int(command[1]))))
+        print(new_command)
+        exec_command(new_command,dict)
+    else:     
+        for i in range(len(dict)):
+            dict_list=str(i+1)+": "+str(dict.get(i+1))
+            print(dict_list)
+                
+        
+        
+        
 while True:
     line = input('psh> ')
-
+    
     _command = word_list(line)
+    dict.update({dictCounter : " ".join(_command)})
     last_command = _command[len(_command) - 1]
-    try:
-        exec_command(_command)
-    except:
-        print("Command doesn't exsit!")
-
+    exec_command(_command,dict)
+    #print(dict)
+    #print(len(dict))
+    dictCounter+=1
+   
