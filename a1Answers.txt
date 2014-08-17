@@ -1,0 +1,38 @@
+QUESTION 1
+
+
+#pipeline
+def pipeline(command):
+    
+        try:      
+            if '&' in command:          #check ampersand
+                amper=1
+            else:
+                amper=0
+            
+            child=os.fork()    #child process
+            if child==0 :               #if it is child process
+                while '|' in command:           #if it is piping
+                    pipe_index=command.index('|')   #get '|' index position    
+                    r,w=os.pipe() #create pipe writer and reader
+                    grand_child=os.fork()   #grandchild process
+                    if grand_child==0:      # if it is grandchild
+                        os.dup2(w,1)        #replace STDIN to writer in index 1
+                        os.close(w)         #close writer
+                        sys.stdin.close()   #close STDIN
+                        os.execvp(command[0],command[0:pipe_index])     # execute command before '|'
+                    os.dup2(r,0)    #replace STDOUT to reader in index 0
+                    os.close(r)     #close reader
+                    sys.stdout.close()  #close STDOUT
+                    del command[:pipe_index+1] #deleter command before '|' in case duplicate command
+                os.execvp(command[0],command) #excute command after '|'
+            else:
+                if amper==0:    #if it doesnt have ampersand then do wait child process finish
+                    os.waitpid(child,0)
+        except:
+            print("Unexpected error2:", sys.exc_info()[0])
+            
+            
+            
+
+QUESTION 2
