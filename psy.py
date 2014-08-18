@@ -143,11 +143,11 @@ def pipeline(command):
                     if grand_child==0:
                         os.dup2(w,1)#replace to w in index 1
                         os.close(w)#close w
-                        sys.stdin.close()# close stand in 
+                        os.close(r)# close stand in 
                         os.execvp(command[0],command[0:pipe_index])# execute command before '|'
                     os.dup2(r,0)
                     os.close(r)
-                    sys.stdout.close()
+                    os.close(w)
                     del command[:pipe_index+1]
                 os.execvp(command[0],command)
             else:
@@ -165,7 +165,7 @@ def jobs(jobList):
         result,error=ps.communicate()
         if result.decode()!='':
             print('[{}] <{}> {}'.format(jobKey,result.decode()[0],str(pid)))
-            print("jobs")
+            #print("jobs")
             
 #execute commands            
 def exec_command(command,dict,job_counter):
@@ -193,7 +193,10 @@ def exec_command(command,dict,job_counter):
     
         
 while True:
-    line = input('psh> ')
+    try:
+        line = input('psh> ')
+    except EOFError:
+        break
     _command = word_list(line)
     
     exec_command(_command,dict,job_counter)
