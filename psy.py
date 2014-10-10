@@ -23,6 +23,7 @@ global _vaildCommand
 _vaildCommand=True
 dict={}
 jobList={}
+state=[]
 
 
 
@@ -59,9 +60,14 @@ def cd(command):
 
 #add job 
 def add_job(command,child,job_counter):
-    
-    jobList.update({job_counter : " ".join(str(child))})
-    print("["+str(job_counter)+"] "+str(child))    
+    try:
+        idCommand=[]
+        idCommand[0]=child
+        idCommand[1]=command
+        jobList.update({job_counter : " ".join(idCommand)})
+        print("["+str(job_counter)+"] "+str(child))  
+    except:
+         print("Unexpected error2:", sys.exc_info())
 
 #rest_command
 def rest_command(command,job_counter,_vaildCommand):
